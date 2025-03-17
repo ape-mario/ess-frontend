@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
-import axios from '@/plugins/axios';
 
 const checkbox = ref(false);
 const valid = ref(false);
@@ -21,17 +20,14 @@ const emailRules = ref([
   (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
 ]);
 
+const authStore = useAuthStore();
+
 async function validate(values: any, { setErrors }: any) {
   loading.value = true;
   error.value = '';
   try {
-    const response = await axios.post('/auth/login', {
-      username: username.value,
-      password: password.value
-    });
-    const token: string = response.data.idToken;
-    localStorage.setItem('id_token', token);
-    window.location.href = '/dashboard/default';
+    await authStore.login(username.value, password.value);
+    // The store will handle the redirect
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error(err.message);
